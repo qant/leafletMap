@@ -17,9 +17,9 @@ class UI {
   }
 
   async loadData() {
-    const response = await fetch(
-      "https://api.datos.gob.mx/v1/precio.gasolina.publico"
-    );
+    const pageSize = 100;
+    const url = `https://api.datos.gob.mx/v1/precio.gasolina.publico?pageSize=${pageSize}`;
+    const response = await fetch(url);
     const dataJson = await response.json();
     return dataJson;
   }
@@ -28,10 +28,17 @@ class UI {
     this.markers.clearLayers();
     items.forEach(item => {
       const { latitude, longitude, regular, premium, calle } = item;
+      const optionsPopup = L.popup().setContent(
+        `
+      <p>Street:<span style="color:blue">${calle}<span></p>
+      <p><b style="color:red">Regular price:</b> $ ${regular}</p>
+      <p><b style="color:green">Premium price:</b> $ ${premium}</p>      
+      `
+      );
       const marker = new L.marker([
         parseFloat(latitude),
         parseFloat(longitude)
-      ]);
+      ]).bindPopup(optionsPopup);
       this.markers.addLayer(marker);
     });
     this.markers.addTo(this.mapa);
