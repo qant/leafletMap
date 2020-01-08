@@ -3,6 +3,7 @@ class UI {
     // Iniciar el mapa
     this.markers = new L.LayerGroup();
     this.mapa = this.inicializarMapa();
+    this.map = new API();
   }
 
   inicializarMapa() {
@@ -16,12 +17,12 @@ class UI {
     return map;
   }
 
-  async loadData() {
-    const pageSize = 100;
-    const url = `https://api.datos.gob.mx/v1/precio.gasolina.publico?pageSize=${pageSize}`;
-    const response = await fetch(url);
-    const dataJson = await response.json();
-    return dataJson;
+  showAllPins() {
+    const map = this.map.loadData();
+    map.then(result => {
+      //console.log(result.results);
+      this.showPin(result.results);
+    });
   }
 
   showPin(items) {
@@ -42,5 +43,23 @@ class UI {
       this.markers.addLayer(marker);
     });
     this.markers.addTo(this.mapa);
+  }
+
+  getSearchResults(search) {
+    this.map.loadData().then(data => {
+      const results = data.results;
+      //console.log(data);
+      this.filterSearchResults(results, search);
+    });
+  }
+
+  filterSearchResults(results, search) {
+    console.log(search);
+    const filtered = results.filter(
+      //search in calle part of street name from search string
+      filtered => filtered.calle.indexOf(search) !== -1
+    );
+    console.log(filtered);
+    this.showPin(filtered);
   }
 }
